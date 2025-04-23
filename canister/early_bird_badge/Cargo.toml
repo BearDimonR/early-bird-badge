@@ -1,0 +1,24 @@
+# canister/early_bird_badge/Cargo.toml
+[package]
+name = "early_bird_badge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+candid = "0.8.4"
+ic-cdk = "0.7.4"
+ic-cdk-macros = "0.6.10"
+ic-stable-structures = "0.6" # Often needed for stable storage
+serde = "1.0.152"
+serde_bytes = "0.11"
+
+# Assuming we might build upon a standard implementation or need common types
+# Add dip721-nft-container if using it directly, otherwise manage state manually
+# dip721-nft-container = "0.2.0" # Example dependency if needed
+
+[profile.release]
+lto = true
+opt-level = 'z' # Optimize for size 

@@ -1,0 +1,30 @@
+{
+  "canisters": {
+    "early_bird_badge": {
+      "candid": "canister/early_bird_badge/early_bird_badge.did",
+      "package": "early_bird_badge",
+      "type": "rust"
+    },
+    "early_bird_badge_assets": {
+      "dependencies": ["early_bird_badge"],
+      "frontend": {
+        "entrypoint": "app/index.html"
+      },
+      "source": ["app/assets", "dist/early_bird_badge_assets/"],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
