@@ -4,6 +4,7 @@
 import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
+import { AnonymousIdentity } from "@dfinity/agent";
 import { idlFactory } from "../src/declarations/early_bird_badge";
 import type {
   _SERVICE,
@@ -54,11 +55,16 @@ export const createBadgeActor = async (): Promise<_SERVICE> => {
     identity = client.getIdentity();
   }
 
-  const agent = new HttpAgent({ host, identity });
+  const agent = new HttpAgent({
+    host,
+    identity,
+  });
 
-  if (process.env.NODE_ENV !== "production") {
+  // Always fetch root key for local development
+  if (host.includes("127.0.0.1") || host.includes("localhost")) {
     try {
       await agent.fetchRootKey();
+      console.log("Successfully fetched root key for local development");
     } catch (err) {
       console.warn(
         "Unable to fetch root key. Check to ensure that your local replica is running"
@@ -104,6 +110,18 @@ export const logout = async (): Promise<void> => {
  * @returns {Promise<boolean>} Whether the claim was successful
  */
 export const claimBadge = async (metadata: string): Promise<boolean> => {
+  // For update calls, ensure we're authenticated
+  const client = await getAuthClient();
+  if (!(await client.isAuthenticated())) {
+    await new Promise<void>((resolve, reject) => {
+      client.login({
+        identityProvider: identityProvider,
+        onSuccess: resolve,
+        onError: reject,
+      });
+    });
+  }
+
   const badgeActor = await createBadgeActor();
   try {
     return await badgeActor.claim_badge(metadata);
@@ -216,16 +234,15 @@ export const mintBadge = async (): Promise<bigint> => {
 
 /**
  * Gets the remaining supply of badges.
- * NOTE: This function needs to be added to the Rust canister!
  * @returns {Promise<bigint>} The number of remaining badges.
  */
 export const getRemainingSupply = async (): Promise<bigint> => {
   const badgeActor = await createBadgeActor();
   try {
-    const total = await badgeActor.total_supply();
-    return total;
+    const totalBadges = await badgeActor.badge_count();
+    return BigInt(100) - totalBadges; // Assuming max supply is 100
   } catch (e) {
-    console.error("Error getting total supply:", e);
+    console.error("Error getting remaining supply:", e);
     return BigInt(0);
   }
 };
@@ -237,9 +254,8 @@ export const getRemainingSupply = async (): Promise<bigint> => {
  */
 export const checkBadgeOwnership = async (): Promise<boolean> => {
   try {
-    const principal = await getPrincipal();
     const badgeActor = await createBadgeActor();
-    return await badgeActor.has_nft(principal);
+    return await badgeActor.has_badge();
   } catch (error) {
     console.error("Failed to check badge ownership:", error);
     return false;

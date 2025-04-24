@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check } from "lucide-react";
-import { checkBadgeOwnership } from "@/lib/agent";
+import { hasBadge } from "@/lib/agent";
 import { useRouter } from "next/navigation";
 
 interface PricingPlan {
@@ -43,7 +43,7 @@ const pricingPlans: PricingPlan[] = [
 const ACCENT_COLOR = "#4F46E5";
 
 export default function Pricing() {
-  const [hasBadge, setHasBadge] = useState<boolean>(false);
+  const [hasBadgeState, setHasBadgeState] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
@@ -51,11 +51,11 @@ export default function Pricing() {
     const checkOwnership = async () => {
       setIsLoading(true);
       try {
-        const ownerStatus = await checkBadgeOwnership();
-        setHasBadge(ownerStatus);
+        const ownerStatus = await hasBadge();
+        setHasBadgeState(ownerStatus);
       } catch (error) {
         console.error("Error checking badge ownership:", error);
-        setHasBadge(false);
+        setHasBadgeState(false);
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +76,7 @@ export default function Pricing() {
         <p className="text-lg text-muted-foreground max-w-xl mx-auto">
           {isLoading
             ? "Checking badge status..."
-            : hasBadge
+            : hasBadgeState
             ? "As an EarlyBirdBadge holder, you get exclusive discounts on all plans!"
             : "Subscribe to access our platform. Badge holders get special discounts!"}
         </p>
@@ -98,11 +98,13 @@ export default function Pricing() {
                   <div className="flex items-baseline gap-2 mb-6">
                     <span
                       className="text-3xl font-bold"
-                      style={{ color: hasBadge ? ACCENT_COLOR : "inherit" }}
+                      style={{
+                        color: hasBadgeState ? ACCENT_COLOR : "inherit",
+                      }}
                     >
-                      {hasBadge ? plan.holderPrice : plan.standardPrice}
+                      {hasBadgeState ? plan.holderPrice : plan.standardPrice}
                     </span>
-                    {hasBadge && (
+                    {hasBadgeState && (
                       <span className="text-sm line-through text-muted-foreground">
                         {plan.standardPrice}
                       </span>
@@ -110,7 +112,7 @@ export default function Pricing() {
                     <span className="text-muted-foreground">ICP/mo</span>
                   </div>
 
-                  {hasBadge && (
+                  {hasBadgeState && (
                     <div
                       className="text-sm p-2 rounded-md mb-4"
                       style={{
@@ -152,7 +154,7 @@ export default function Pricing() {
         </div>
       )}
 
-      {!isLoading && !hasBadge && (
+      {!isLoading && !hasBadgeState && (
         <div className="mt-12 text-center">
           <p className="mb-4 text-gray-600">
             Want to get the discounted prices?

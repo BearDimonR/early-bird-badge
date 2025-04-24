@@ -1,13 +1,14 @@
 // components/BadgeCard.tsx
 import React from "react";
 import Link from "next/link";
+import { Badge } from "../src/declarations/early_bird_badge/early_bird_badge.did";
 
 interface BadgeCardProps {
-  id: bigint;
+  badge: Badge;
 }
 
-const BadgeCard: React.FC<BadgeCardProps> = ({ id }) => {
-  const badgeId = id.toString();
+const BadgeCard: React.FC<BadgeCardProps> = ({ badge }) => {
+  const badgeId = badge.id.toString();
   // Placeholder image URL - replace with actual logic if available
   // const imageUrl = `/images/badges/${badgeId}.png`; // Requires images in public/images/badges/
   const imageUrl = `https://via.placeholder.com/150/4F46E5/FFFFFF?text=Badge+${badgeId}`; // Placeholder
@@ -23,6 +24,9 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ id }) => {
         <div className="p-4">
           <p className="font-semibold text-center text-gray-700">
             Badge #{badgeId}
+          </p>
+          <p className="text-sm text-center text-gray-500 mt-2">
+            {badge.metadata}
           </p>
         </div>
       </div>

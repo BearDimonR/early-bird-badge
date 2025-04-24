@@ -1,14 +1,8 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::api::call::CallResult;
 use ic_cdk::{caller, id, trap};
 use ic_cdk_macros::*;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use ic_stable_structures::memory_manager::VirtualMemory;
-use ic_stable_structures::DefaultMemoryImpl;
-
-// Type aliases for convenience
-type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 // State management
 thread_local! {

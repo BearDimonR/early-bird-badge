@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Principal } from "@dfinity/principal";
-import { getTokensOf, getPrincipal } from "@/lib/agent";
+import { getPrincipal, hasBadge, getBadge } from "@/lib/agent";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 // import Header from "@/components/header"; // Removed header import
@@ -13,43 +13,39 @@ import BadgeCard from "@/components/BadgeCard"; // Import the extracted componen
 // const BadgeCard: React.FC<{ id: bigint }> = ({ id }) => { ... }; // REMOVED
 
 export default function MyBadges() {
-  const [badges, setBadges] = useState<bigint[]>([]);
+  const [badge, setBadge] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchBadges = async () => {
+    const fetchBadge = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        // Need to ensure user is authenticated before calling this
-        // getPrincipal will throw if not authenticated, handled by catch
         const principal = await getPrincipal();
-        const ownedTokens = await getTokensOf(principal);
-        setBadges(ownedTokens);
+        const hasABadge = await hasBadge();
+        if (hasABadge) {
+          const badgeDetails = await getBadge();
+          setBadge(badgeDetails);
+        }
       } catch (err) {
-        console.error("Error fetching badges:", err);
+        console.error("Error fetching badge:", err);
         setError(
-          `Failed to load badges. ${
+          `Failed to load badge. ${
             err instanceof Error &&
             err.message.includes("User is not authenticated")
-              ? "Please connect your wallet/log in." // Updated message
+              ? "Please connect your wallet/log in."
               : "Please try again later."
           }`
         );
-        // Optional: Redirect to login/home if auth error?
-        // if (err instanceof Error && err.message.includes("User is not authenticated")) {
-        //   // Could trigger login via agent or redirect
-        //   // Example: router.push('/'); // Redirect home
-        // }
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchBadges();
-  }, []); // Fetch on mount
+    fetchBadge();
+  }, []);
 
   return (
     // <main className="min-h-screen flex flex-col"> // Removed
@@ -58,17 +54,17 @@ export default function MyBadges() {
     <div className="container max-w-4xl mx-auto px-4 py-12">
       {" "}
       {/* Content starts directly with container */}
-      <h1 className="text-3xl font-bold mb-8">My Badges</h1>
-      {isLoading && <p className="text-gray-600">Loading your badges...</p>}
+      <h1 className="text-3xl font-bold mb-8">My Badge</h1>
+      {isLoading && <p className="text-gray-600">Loading your badge...</p>}
       {error && (
         <p className="text-red-600 bg-red-100 p-3 rounded border border-red-300">
           {error}
         </p>
       )}
-      {!isLoading && !error && badges.length === 0 && (
+      {!isLoading && !error && !badge && (
         <div className="text-center py-10 px-6 bg-gray-100 rounded-lg">
           <p className="text-lg text-gray-600 mb-4">
-            You don't own any EarlyBirdBadges yet.
+            You don't own an Early Bird Badge yet.
           </p>
           <Button
             onClick={() => router.push("/")}
@@ -78,11 +74,9 @@ export default function MyBadges() {
           </Button>
         </div>
       )}
-      {!isLoading && !error && badges.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {badges.map((badgeId) => (
-            <BadgeCard key={badgeId.toString()} id={badgeId} />
-          ))}
+      {!isLoading && !error && badge && (
+        <div className="grid grid-cols-1 gap-6">
+          <BadgeCard badge={badge} />
         </div>
       )}
     </div>
