@@ -1,15 +1,11 @@
+use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cdk::api::call::CallResult;
-use ic_cdk::export::{
-    candid::{CandidType, Deserialize, Nat},
-    Principal,
-};
-use ic_cdk::storage;
 use ic_cdk::{caller, id, trap};
 use ic_cdk_macros::*;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use ic_stable_structures::memory_manager::VirtualMemory;
+use ic_stable_structures::DefaultMemoryImpl;
 
 // Type aliases for convenience
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -173,7 +169,7 @@ fn mint_nft() -> Result<Nat, String> {
     // Get the next NFT ID
     let nft_id = NEXT_NFT_ID.with(|id| {
         let current = id.borrow().clone();
-        *id.borrow_mut() = current.clone() + 1;
+        *id.borrow_mut() = current.clone() + Nat::from(1u64);
         current
     });
     
@@ -200,8 +196,20 @@ fn get_nft_id(user: Principal) -> Option<Nat> {
 // Get the total number of minted NFTs
 #[ic_cdk::query]
 fn total_supply() -> Nat {
-    NEXT_NFT_ID.with(|id| id.borrow().clone() - 1)
+    NEXT_NFT_ID.with(|id| {
+        let current = id.borrow().clone();
+        if current > Nat::from(0u64) {
+            current - Nat::from(1u64)
+        } else {
+            Nat::from(0u64)
+        }
+    })
 }
 
 // Generate Candid interface
-ic_cdk::export_candid!(); 
+candid::export_service!(); 
+
+#[ic_cdk_macros::query(name = "__get_candid_interface_tmp_hack")]
+fn export_candid() -> String {
+    __export_service()
+} 

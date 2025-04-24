@@ -1,9 +1,14 @@
 {
   "canisters": {
+    "internet_identity": {
+      "type": "pull",
+      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+    },
     "early_bird_badge": {
       "candid": "canister/early_bird_badge/early_bird_badge.did",
       "package": "early_bird_badge",
-      "type": "rust"
+      "type": "rust",
+      "source": ["canister/early_bird_badge"]
     },
     "early_bird_badge_assets": {
       "dependencies": ["early_bird_badge"],
@@ -24,6 +29,10 @@
     "local": {
       "bind": "127.0.0.1:8000",
       "type": "ephemeral"
+    },
+    "ic": {
+      "providers": ["https://mainnet.dfinity.network"],
+      "type": "persistent"
     }
   },
   "version": 1

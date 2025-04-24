@@ -19,7 +19,7 @@ fi
 
 # Install dependencies
 echo "Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then

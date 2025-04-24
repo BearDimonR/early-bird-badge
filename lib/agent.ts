@@ -4,12 +4,11 @@
 import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
-// Assuming the candid interface is generated at this location relative to the workspace root
-// Adjust the path if necessary after running 'dfx generate'
-import {
-  idlFactory,
+import { idlFactory } from "../src/declarations/early_bird_badge";
+import type {
   _SERVICE,
-} from "../declarations/early_bird_badge/early_bird_badge.did"; // Adjust path as needed
+  Badge,
+} from "../src/declarations/early_bird_badge/early_bird_badge.did";
 
 const canisterId = process.env.NEXT_PUBLIC_EARLY_BIRD_BADGE_CANISTER_ID!;
 const host = process.env.NEXT_PUBLIC_DFX_HOST!;
@@ -31,12 +30,10 @@ const getAuthClient = async (): Promise<AuthClient> => {
 
 /**
  * Creates an actor instance for the early_bird_badge canister
- * Requires the user to be authenticated.
  * @returns {Promise<_SERVICE>} The authenticated actor instance.
  */
 export const createBadgeActor = async (): Promise<_SERVICE> => {
   if (actor) {
-    // Return existing actor if already created and authenticated
     return actor;
   }
 
@@ -45,26 +42,20 @@ export const createBadgeActor = async (): Promise<_SERVICE> => {
   let identity: Identity;
 
   if (!isAuthenticated) {
-    // User is not authenticated, initiate login flow
     await new Promise<void>((resolve, reject) => {
       client.login({
         identityProvider: identityProvider,
         onSuccess: resolve,
         onError: reject,
-        // Optional: Set a maximum time to wait for login
-        // maxTimeToLive: BigInt(60 * 60 * 1000 * 1000 * 1000), // 1 hour in nanoseconds
       });
     });
     identity = client.getIdentity();
   } else {
-    // User is already authenticated
     identity = client.getIdentity();
   }
 
-  // Create the agent
   const agent = new HttpAgent({ host, identity });
 
-  // Fetch root key for local development environments (optional, remove for mainnet)
   if (process.env.NODE_ENV !== "production") {
     try {
       await agent.fetchRootKey();
@@ -76,19 +67,16 @@ export const createBadgeActor = async (): Promise<_SERVICE> => {
     }
   }
 
-  // Create the actor instance
   actor = Actor.createActor<_SERVICE>(idlFactory, {
     agent,
     canisterId,
   });
 
-  console.log("Actor created successfully.");
   return actor;
 };
 
 /**
  * Gets the current authenticated user's principal.
- * Requires the user to be authenticated.
  * @returns {Promise<Principal>}
  */
 export const getPrincipal = async (): Promise<Principal> => {
@@ -106,8 +94,100 @@ export const getPrincipal = async (): Promise<Principal> => {
 export const logout = async (): Promise<void> => {
   const client = await getAuthClient();
   await client.logout();
-  actor = null; // Clear the actor instance on logout
-  authClient = null; // Clear the auth client instance
+  actor = null;
+  authClient = null;
+};
+
+/**
+ * Claims a badge for the current user.
+ * @param {string} metadata - Metadata for the badge
+ * @returns {Promise<boolean>} Whether the claim was successful
+ */
+export const claimBadge = async (metadata: string): Promise<boolean> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    return await badgeActor.claim_badge(metadata);
+  } catch (e) {
+    console.error("Error claiming badge:", e);
+    throw e;
+  }
+};
+
+/**
+ * Checks if the current user has a badge.
+ * @returns {Promise<boolean>}
+ */
+export const hasBadge = async (): Promise<boolean> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    return await badgeActor.has_badge();
+  } catch (e) {
+    console.error("Error checking badge:", e);
+    throw e;
+  }
+};
+
+/**
+ * Gets the badge details for the current user.
+ * @returns {Promise<Badge | null | undefined>}
+ */
+export const getBadge = async (): Promise<Badge | null | undefined> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    const result = await badgeActor.get_badge();
+    if (!result) return null;
+    return Array.isArray(result) && result.length > 0 ? result[0] : null;
+  } catch (e) {
+    console.error("Error getting badge:", e);
+    throw e;
+  }
+};
+
+/**
+ * Gets the total number of badges issued.
+ * @returns {Promise<bigint>}
+ */
+export const getBadgeCount = async (): Promise<bigint> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    return await badgeActor.badge_count();
+  } catch (e) {
+    console.error("Error getting badge count:", e);
+    throw e;
+  }
+};
+
+/**
+ * Mints a new NFT for the current user.
+ * @returns {Promise<bigint>} The ID of the minted NFT
+ */
+export const mintNFT = async (): Promise<bigint> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    const result = await badgeActor.mint_nft();
+    if ("Ok" in result) {
+      return result.Ok;
+    } else {
+      throw new Error(result.Err);
+    }
+  } catch (e) {
+    console.error("Error minting NFT:", e);
+    throw e;
+  }
+};
+
+/**
+ * Gets the total supply of NFTs.
+ * @returns {Promise<bigint>}
+ */
+export const getTotalSupply = async (): Promise<bigint> => {
+  const badgeActor = await createBadgeActor();
+  try {
+    return await badgeActor.total_supply();
+  } catch (e) {
+    console.error("Error getting total supply:", e);
+    throw e;
+  }
 };
 
 // --- Wrapper functions with basic error handling ---
@@ -118,12 +198,10 @@ export const logout = async (): Promise<void> => {
  */
 export const mintBadge = async (): Promise<bigint> => {
   const badgeActor = await createBadgeActor();
-  const principal = await getPrincipal();
   try {
-    const result = await badgeActor.mint(principal);
+    const result = await badgeActor.mint_nft();
     if ("Ok" in result) {
       console.log("Mint successful, Token ID:", result.Ok);
-      // The spec used u64 which corresponds to bigint in JS/TS Candid
       return result.Ok;
     } else {
       console.error("Minting failed:", result.Err);
@@ -132,52 +210,6 @@ export const mintBadge = async (): Promise<bigint> => {
   } catch (e) {
     console.error("Error calling mint:", e);
     alert(`Minting failed: ${e instanceof Error ? e.message : String(e)}`);
-    throw e; // Re-throw after logging/alerting
-  }
-};
-
-/**
- * Gets the list of token IDs owned by a principal.
- * @param {Principal} owner - The principal to query.
- * @returns {Promise<bigint[]>} A list of token IDs.
- */
-export const getTokensOf = async (owner: Principal): Promise<bigint[]> => {
-  // Use a non-authenticating agent for this query if desired,
-  // or just use the standard authenticated actor.
-  const badgeActor = await createBadgeActor(); // Or create a separate query actor
-  try {
-    // The spec used Vec<u64>, which corresponds to bigint[]
-    return await badgeActor.tokens_of(owner);
-  } catch (e) {
-    console.error("Error calling tokens_of:", e);
-    // Depending on context, might not want to alert on read failures
-    throw e;
-  }
-};
-
-/**
- * Transfers a token to another principal.
- * @param {Principal} to - The recipient principal.
- * @param {bigint} tokenId - The ID of the token to transfer.
- * @returns {Promise<void>}
- */
-export const transferBadge = async (
-  to: Principal,
-  tokenId: bigint
-): Promise<void> => {
-  const badgeActor = await createBadgeActor();
-  try {
-    const result = await badgeActor.transfer(to, tokenId);
-    if ("Ok" in result) {
-      console.log(`Transfer successful: Token ${tokenId} to ${to.toText()}`);
-      alert(`Transfer successful!`); // Provide user feedback
-    } else {
-      console.error("Transfer failed:", result.Err);
-      throw new Error(`Transfer failed: ${result.Err}`);
-    }
-  } catch (e) {
-    console.error("Error calling transfer:", e);
-    alert(`Transfer failed: ${e instanceof Error ? e.message : String(e)}`);
     throw e;
   }
 };
@@ -188,42 +220,13 @@ export const transferBadge = async (
  * @returns {Promise<bigint>} The number of remaining badges.
  */
 export const getRemainingSupply = async (): Promise<bigint> => {
-  const badgeActor = await createBadgeActor(); // Or a query actor
+  const badgeActor = await createBadgeActor();
   try {
-    // Assuming a 'remaining_supply' function exists that returns u64 (bigint)
-    // This needs to be added to the canister's lib.rs and candid file!
-    if (typeof badgeActor.remaining_supply === "function") {
-      const remaining = await badgeActor.remaining_supply(); // Ideal case
-      // Ensure the result is a bigint, convert if necessary (e.g., if it returns number)
-      return typeof remaining === "bigint" ? remaining : BigInt(remaining);
-    } else if (
-      typeof badgeActor.total_supply === "function" &&
-      typeof badgeActor.minted_count === "function"
-    ) {
-      // Fallback calculation if specific function isn't available but others are
-      console.warn(
-        "`remaining_supply` function not found on actor. Calculating from total_supply and minted_count."
-      );
-      const total = await badgeActor.total_supply(); // Assuming returns max supply (u64 -> bigint)
-      const minted = await badgeActor.minted_count(); // Assuming returns current count (u64 -> bigint)
-      // Ensure results are bigints before calculation
-      const totalBigInt = typeof total === "bigint" ? total : BigInt(total);
-      const mintedBigInt = typeof minted === "bigint" ? minted : BigInt(minted);
-      return totalBigInt - mintedBigInt;
-    } else {
-      // Final fallback or placeholder if essential functions don't exist yet
-      console.warn(
-        "Essential supply functions (`remaining_supply`, `total_supply`, `minted_count`) not found on actor. Returning placeholder 100."
-      );
-      return BigInt(100); // Placeholder based on spec's MAX_SUPPLY
-    }
+    const total = await badgeActor.total_supply();
+    return total;
   } catch (e) {
-    console.error(
-      "Error calling getRemainingSupply (or fallback calculation):",
-      e
-    );
-    // Return a default/safe value or re-throw
-    return BigInt(0); // Example fallback indicating an error or zero remaining
+    console.error("Error getting total supply:", e);
+    return BigInt(0);
   }
 };
 
@@ -235,16 +238,10 @@ export const getRemainingSupply = async (): Promise<bigint> => {
 export const checkBadgeOwnership = async (): Promise<boolean> => {
   try {
     const principal = await getPrincipal();
-    const tokens = await getTokensOf(principal);
-    return tokens.length > 0;
+    const badgeActor = await createBadgeActor();
+    return await badgeActor.has_nft(principal);
   } catch (error) {
-    // If user is not authenticated, getPrincipal() will throw.
-    // Also handle errors from getTokensOf.
-    console.error(
-      "Failed to check badge ownership (might be unauthenticated):",
-      error
-    );
-    // Assume no badge if check fails or user isn't logged in
+    console.error("Failed to check badge ownership:", error);
     return false;
   }
 };

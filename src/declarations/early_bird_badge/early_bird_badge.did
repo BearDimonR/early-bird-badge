@@ -1,0 +1,27 @@
+type Badge = record {
+  id : nat64;
+  owner : principal;
+  metadata : text;
+  timestamp : nat64;
+};
+
+service : {
+  // Badge management
+  has_badge : () -> (bool) query;
+  get_badge : () -> (opt Badge) query;
+  claim_badge : (text) -> (bool);
+  
+  // NFT functionality
+  mint_nft : () -> (variant { Ok : nat; Err : text });
+  has_nft : (principal) -> (bool) query;
+  get_nft_id : (principal) -> (opt nat) query;
+  total_supply : () -> (nat) query;
+  
+  // Admin functions
+  set_admin : (principal) -> ();
+  get_all_badges : () -> (vec record { principal; Badge }) query;
+  
+  // Utility functions
+  whoami : () -> (principal) query;
+  badge_count : () -> (nat64) query;
+} 

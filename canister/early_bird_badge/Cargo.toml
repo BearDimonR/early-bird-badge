@@ -8,11 +8,11 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-candid = "0.8.4"
-ic-cdk = "0.7.4"
-ic-cdk-macros = "0.6.10"
+candid = "0.10"
+ic-cdk = "0.12"
+ic-cdk-macros = "0.8"
 ic-stable-structures = "0.6" # Often needed for stable storage
-serde = "1.0.152"
+serde = "1.0"
 serde_bytes = "0.11"
 
 # Assuming we might build upon a standard implementation or need common types
