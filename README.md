@@ -1,6 +1,80 @@
-# EarlyBirdBadge dApp
+# Early Bird Badge
 
-A decentralized application (dApp) built on the Internet Computer that demonstrates on-chain NFT benefits through verifiable ownership and discount gating. This project showcases a minimal 4-screen dApp with a clear user flow and detailed development guidance.
+This project is split into two main parts:
+
+- Frontend: Next.js application
+- Backend: Internet Computer canister written in Rust
+
+## Project Structure
+
+```
+early-bird-badge/
+├── backend/           # Backend canister code
+│   ├── canister/     # Internet Computer canister
+│   ├── src/          # Rust source code
+│   └── Cargo.toml    # Rust dependencies
+├── frontend/         # Frontend Next.js application
+│   ├── app/          # Next.js pages and API routes
+│   ├── components/   # React components
+│   ├── hooks/        # Custom React hooks
+│   ├── lib/          # Utility functions
+│   └── public/       # Static assets
+└── dfx.json          # DFX configuration
+```
+
+## Prerequisites
+
+- Node.js (v16 or later)
+- DFX (Internet Computer SDK)
+- Rust and Cargo
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+# Install root dependencies
+npm install
+
+# Install frontend dependencies
+cd frontend && npm install
+```
+
+2. Start the local Internet Computer replica:
+
+```bash
+npm run start
+```
+
+3. In a new terminal, deploy the canisters:
+
+```bash
+npm run deploy
+```
+
+4. Start the development server:
+
+```bash
+npm run dev
+```
+
+The application will be available at http://localhost:3000
+
+## Development
+
+- Frontend development: Work in the `frontend` directory
+- Backend development: Work in the `backend` directory
+- Canister deployment: Use `npm run deploy` from the root directory
+
+## Building for Production
+
+```bash
+npm run build
+```
+
+## License
+
+See LICENSE file for details.
 
 ## Features
 
@@ -25,60 +99,6 @@ A decentralized application (dApp) built on the Internet Computer that demonstra
   - Radix UI Components
   - React Hook Form
   - Zod Validation
-
-## Prerequisites
-
-- Node.js v16+
-- DFX v0.14+
-- Internet Computer SDK
-- Yarn or npm
-
-## Getting Started
-
-1. **Clone the repository**
-
-   ```bash
-   git clone [repository-url]
-   cd early-bird-badge
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Start the local Internet Computer replica**
-
-   ```bash
-   dfx start --background
-   ```
-
-4. **Deploy the canisters**
-
-   ```bash
-   dfx deploy
-   ```
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-The application will be available at `http://localhost:3000`
-
-## Project Structure
-
-```
-/
-├── app/                    # Next.js application pages
-├── components/            # Reusable React components
-├── canister/             # Internet Computer canister code
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility functions and configurations
-├── public/              # Static assets
-└── styles/              # Global styles and Tailwind configuration
-```
 
 ## Core Features
 

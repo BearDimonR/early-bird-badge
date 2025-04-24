@@ -5,17 +5,17 @@
       "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
     },
     "early_bird_badge": {
-      "candid": "canister/early_bird_badge/early_bird_badge.did",
+      "candid": "backend/canister/early_bird_badge/early_bird_badge.did",
       "package": "early_bird_badge",
       "type": "rust",
-      "source": ["canister/early_bird_badge"]
+      "source": ["backend/canister/early_bird_badge"]
     },
     "early_bird_badge_assets": {
       "dependencies": ["early_bird_badge"],
       "frontend": {
-        "entrypoint": "app/index.html"
+        "entrypoint": "frontend/app/index.html"
       },
-      "source": ["app/assets", "dist/early_bird_badge_assets/"],
+      "source": ["frontend/app/assets", "dist/early_bird_badge_assets/"],
       "type": "assets"
     }
   },
