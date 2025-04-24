@@ -8,14 +8,19 @@
       "candid": "backend/canister/early_bird_badge/early_bird_badge.did",
       "package": "early_bird_badge",
       "type": "rust",
-      "source": ["backend/canister/early_bird_badge"]
+      "source": ["backend/canister/early_bird_badge"],
+      "build": "cd backend && cargo build --target wasm32-unknown-unknown --release"
     },
     "early_bird_badge_assets": {
       "dependencies": ["early_bird_badge"],
       "frontend": {
         "entrypoint": "frontend/app/index.html"
       },
-      "source": ["frontend/app/assets", "dist/early_bird_badge_assets/"],
+      "source": [
+        "frontend/public",
+        "frontend/.next",
+        "dist/early_bird_badge_assets/"
+      ],
       "type": "assets"
     }
   },

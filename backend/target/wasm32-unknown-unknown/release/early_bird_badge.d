@@ -1,0 +1,1 @@
+/Users/dmytro.miedviediev/Downloads/early-bird-badge/backend/target/wasm32-unknown-unknown/release/early_bird_badge.wasm: /Users/dmytro.miedviediev/Downloads/early-bird-badge/backend/canister/early_bird_badge/src/lib.rs
