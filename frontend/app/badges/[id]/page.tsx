@@ -20,10 +20,7 @@ export default function BadgeDetailPage() {
     console.error("Invalid badge ID:", badgeIdStr);
   }
 
-  const imageUrl =
-    badgeId !== null
-      ? `https://via.placeholder.com/400/4F46E5/FFFFFF?text=Badge+${badgeId}`
-      : `https://via.placeholder.com/400/CCCCCC/FFFFFF?text=Invalid+ID`;
+  const imageUrl = "/images/early-adopter-badge.png";
 
   const explorerUrl =
     process.env.NEXT_PUBLIC_CANISTER_ID && badgeId !== null

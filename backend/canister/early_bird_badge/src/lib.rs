@@ -159,17 +159,47 @@ fn mint_nft() -> Result<Nat, String> {
     if has_nft(caller) {
         return Err("You already have an Early Bird Badge NFT".to_string());
     }
+
+    // Check if we've reached the maximum supply (100)
+    let current_supply = total_supply();
+    if current_supply >= Nat::from(100u64) {
+        return Err("Maximum supply reached".to_string());
+    }
     
     // Get the next NFT ID
     let nft_id = NEXT_NFT_ID.with(|id| {
         let current = id.borrow().clone();
-        *id.borrow_mut() = current.clone() + Nat::from(1u64);
         current
     });
     
     // Assign the NFT to the caller
     NFT_OWNERS.with(|owners| {
         owners.borrow_mut().insert(caller, nft_id.clone());
+    });
+
+    // Only increment the NFT ID after successful minting
+    NEXT_NFT_ID.with(|id| {
+        *id.borrow_mut() = nft_id.clone() + Nat::from(1u64);
+    });
+
+    // Also create a badge for the caller to maintain consistency
+    let badge_id = BADGE_OWNERS.with(|badge_owners| {
+        badge_owners.borrow().len() as u64 + 1
+    });
+
+    let badge = Badge {
+        id: badge_id,
+        owner: caller,
+        metadata: format!("Early Bird Badge NFT #{}", nft_id),
+        timestamp: ic_cdk::api::time(),
+    };
+
+    BADGE_OWNERS.with(|badge_owners| {
+        badge_owners.borrow_mut().insert(caller, badge);
+    });
+
+    CLAIMED.with(|claimed| {
+        claimed.borrow_mut().insert(caller);
     });
     
     Ok(nft_id)

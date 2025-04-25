@@ -11,7 +11,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({ badge }) => {
   const badgeId = badge.id.toString();
   // Placeholder image URL - replace with actual logic if available
   // const imageUrl = `/images/badges/${badgeId}.png`; // Requires images in public/images/badges/
-  const imageUrl = `https://via.placeholder.com/150/4F46E5/FFFFFF?text=Badge+${badgeId}`; // Placeholder
+  const imageUrl = `/images/early-adopter-badge.png`; // Placeholder
 
   return (
     <Link href={`/badges/${badgeId}`}>
