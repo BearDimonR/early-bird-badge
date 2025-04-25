@@ -1,8 +1,16 @@
 {
   "canisters": {
     "internet_identity": {
-      "type": "pull",
-      "id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2025-04-04-v3/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2025-04-04-v3/internet_identity_dev.wasm.gz",
+      "init_arg": "(opt record { captcha_config = opt record { max_unsolved_captchas= 50:nat64; captcha_trigger = variant {Static = variant {CaptchaDisabled}}}})",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
     },
     "early_bird_badge": {
       "candid": "backend/canister/early_bird_badge/early_bird_badge.did",
@@ -10,18 +18,6 @@
       "type": "rust",
       "source": ["backend/canister/early_bird_badge"],
       "build": "cd backend && cargo build --target wasm32-unknown-unknown --release"
-    },
-    "early_bird_badge_assets": {
-      "dependencies": ["early_bird_badge"],
-      "frontend": {
-        "entrypoint": "frontend/app/index.html"
-      },
-      "source": [
-        "frontend/public",
-        "frontend/.next",
-        "dist/early_bird_badge_assets/"
-      ],
-      "type": "assets"
     }
   },
   "defaults": {
