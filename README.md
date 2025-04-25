@@ -22,6 +22,10 @@ early-bird-badge/
 └── dfx.json          # DFX configuration
 ```
 
+## Project Goal
+
+The goal of this project is to build a minimal 4-screen decentralized application (dApp) that demonstrates key on-chain NFT benefits: verifiable ownership and discount gating. It aims to provide a clear user flow showcasing these features.
+
 ## Prerequisites
 
 - Node.js (v16 or later)
@@ -71,10 +75,6 @@ The application will be available at http://localhost:3000
 ```bash
 npm run build
 ```
-
-## License
-
-See LICENSE file for details.
 
 ## Features
 
@@ -148,14 +148,3 @@ dfx identity new bob
 dfx identity use alice
 dfx identity use bob
 ```
-
-## License
-
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
-
-## Acknowledgments
-
-- Internet Computer Foundation
-- DIP-721 NFT Standard
-- Next.js Team
-- Radix UI Team
