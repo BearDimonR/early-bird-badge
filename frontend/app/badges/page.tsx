@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Principal } from "@dfinity/principal";
-import { getPrincipal, hasBadge, getBadge } from "@/lib/agent";
+import {
+  getPrincipal,
+  hasBadge,
+  getBadge,
+  checkAuthentication,
+} from "@/lib/agent";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 // import Header from "@/components/header"; // Removed header import
@@ -23,6 +28,13 @@ export default function MyBadges() {
       setIsLoading(true);
       setError(null);
       try {
+        // Check authentication first
+        const isAuthenticated = await checkAuthentication();
+        if (!isAuthenticated) {
+          setError("Please log in to view your badges.");
+          return; // Exit early if not authenticated
+        }
+
         const principal = await getPrincipal();
         const hasABadge = await hasBadge();
         if (hasABadge) {

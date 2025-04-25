@@ -9,7 +9,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button"; // Import Button
 import { AuthClient } from "@dfinity/auth-client"; // Import AuthClient for status check
-import { logout, createBadgeActor } from "@/lib/agent"; // Import agent functions
+import { logout, login } from "@/lib/agent"; // Import login instead of createBadgeActor
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,8 +45,8 @@ const AppHeader: React.FC = () => {
   const handleLogin = async () => {
     setIsAuthLoading(true);
     try {
-      // Calling createBadgeActor triggers the login flow if not authenticated
-      await createBadgeActor();
+      // Use the new login function
+      await login();
       setIsAuthenticated(true); // Assume success if no error
       // Optionally redirect or refresh data, depends on desired UX
       // window.location.reload(); // Simple refresh

@@ -9,12 +9,14 @@ import {
   getRemainingSupply,
   checkBadgeOwnership,
   mintBadge,
+  checkAuthentication,
 } from "@/lib/agent";
 
 export default function Home() {
   const [remainingSupply, setRemainingSupply] = useState<bigint | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -24,8 +26,14 @@ export default function Home() {
       const supply = await getRemainingSupply();
       setRemainingSupply(supply);
 
-      const ownerStatus = await checkBadgeOwnership();
-      setIsOwner(ownerStatus);
+      // Only check ownership if the user is authenticated
+      const isAuthenticated = await checkAuthentication();
+      if (isAuthenticated) {
+        const ownerStatus = await checkBadgeOwnership();
+        setIsOwner(ownerStatus);
+      } else {
+        setIsOwner(false); // Assume not an owner if not authenticated
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast({
@@ -41,12 +49,31 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const authStatus = await checkAuthentication();
+      setIsAuthenticated(authStatus);
+    };
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
     refreshData();
   }, []);
 
   const handleMint = async () => {
     setIsLoading(true);
     try {
+      // Check authentication first
+      const isAuthenticated = await checkAuthentication();
+      if (!isAuthenticated) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to claim your badge.",
+          variant: "destructive",
+        });
+        return; // Exit early if not authenticated
+      }
+
       const tokenId = await mintBadge();
 
       toast({
@@ -66,7 +93,8 @@ export default function Home() {
     isLoading ||
     remainingSupply === null ||
     remainingSupply <= BigInt(0) ||
-    isOwner;
+    isOwner ||
+    !isAuthenticated;
 
   return (
     <div className="flex-1 container max-w-4xl mx-auto px-4 py-12 flex flex-col items-center justify-center text-center">
