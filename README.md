@@ -5,6 +5,10 @@ This project is split into two main parts:
 - Frontend: Next.js application
 - Backend: Internet Computer canister written in Rust
 
+## DEMO
+
+https://www.loom.com/share/2cd51bc8a92e4682b442e33f2d0f1fe2?sid=bde251d6-71a8-4bb7-b32c-eebb30039e26
+
 ## Project Structure
 
 ```
